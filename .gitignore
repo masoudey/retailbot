@@ -38,3 +38,6 @@ htmlcov/
 *.swp
 *.swo
 Thumbs.db
+
+# Trained model files
+backend/models/
