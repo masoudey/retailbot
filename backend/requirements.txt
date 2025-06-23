@@ -1,0 +1,33 @@
+# ───── Core Rasa stack ───────────────────────────────────────────
+rasa==3.6.21
+rasa-sdk==3.6.2
+
+# ───── Language-model features (LM featurizer) ───────────────────
+transformers==4.36.2          # must stay <4.37 for Rasa 3.6
+torch==2.2.2                  # GPU/CPU auto-detect build
+sentencepiece==0.1.99         # tokeniser for many HF models
+protobuf==4.23.3              # Rasa pin; newer causes warnings
+
+# ───── Web server & CORS (Rasa’s internal stack) ─────────────────
+sanic==21.12.2
+sanic-routing==0.7.2
+sanic-cors==2.0.1
+sanic-jwt==1.8.0
+
+# ───── Database access (PostgreSQL on Neon) ──────────────────────
+psycopg2-binary==2.9.10
+SQLAlchemy==1.4.54            # used by tracker store
+
+# ───── ML / numerical helpers ────────────────────────────────────
+scikit-learn==1.1.3           # CRF and other utilities
+tensorflow-macos==2.12.0      # Apple-silicon build; remove on Intel/Linux
+tensorflow-hub==0.13.0        # loaded by Rasa for LM weights
+
+# ───── Optional quality-of-life / dev extras ─────────────────────
+black==24.4.2                 # code formatter
+pytest==8.2.2                 # unit-testing
+ruff==0.4.8                   # linting      # load DB creds / secrets from .env
+
+psycopg2-binary>=2.9,<3.0
+faker>=24.0
+tqdm>=4.0

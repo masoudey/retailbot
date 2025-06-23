@@ -1,0 +1,40 @@
+# macOS
+.DS_Store
+
+# Node.js
+node_modules/
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+
+# Build/Dist
+dist/
+build/
+
+# Logs
+*.log
+logs/
+
+# dotenv
+.env
+.env.*
+
+# Editors & IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Test & coverage
+.pytest_cache/
+coverage/
+htmlcov/
+.coverage
+
+# Swap & temp files
+*~
+*.swp
+*.swo
+Thumbs.db

@@ -1,0 +1,63 @@
+version: "3.1"
+
+stories:
+- story: happy path order status
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: ask_order_status
+  - action: utter_ask_order_id
+  - intent: provide_order_id
+    entities:
+      - order_id: "12345"
+  - action: action_check_order_status
+  - action: utter_order_status
+  - intent: thankyou
+  - action: utter_thankyou
+  - intent: goodbye
+  - action: utter_goodbye
+
+- story: order not found
+  steps:
+  - intent: ask_order_status
+  - action: utter_ask_order_id
+  - intent: provide_order_id
+    entities:
+      - order_id: "00000"
+  - action: action_check_order_status
+  - action: utter_order_not_found
+
+- story: file complaint
+  steps:
+  - intent: ask_complaint
+  - action: utter_ask_complaint
+  - intent: provide_complaint
+  - action: action_log_complaint
+  - action: utter_complaint_received
+  - intent: goodbye
+  - action: utter_goodbye
+
+- story: product recommendation
+  steps:
+  - intent: ask_product_recommendation
+  - action: utter_ask_preferences
+  - intent: provide_preferences
+    entities:
+      - product_category: "electronics"
+  - action: action_recommend_products
+  - intent: deny
+  - action: utter_goodbye
+
+- story: general info flow
+  steps:
+  - intent: ask_general_info
+  - action: utter_ask_general_info
+  - intent: goodbye
+  - action: utter_goodbye
+
+
+
+- story: list categories
+  steps:
+  - intent: list_categories
+  - action: action_list_categories

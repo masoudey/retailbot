@@ -1,0 +1,187 @@
+version: "3.1"
+
+intents:
+  - greet
+  - goodbye
+  - ask_order_status
+  - provide_order_id
+  - ask_complaint
+  - provide_complaint
+  - ask_product_recommendation
+  - provide_preferences
+  - order_product      # new intent
+  - provide_quantity   # new intent
+  - provide_address    # new intent
+  - ask_general_info
+  - thankyou
+  - deny
+  - track_shipment
+  - cancel_order
+  - return_order
+  - list_categories
+  - product_search
+  - product_availability
+  - update_address
+  - ask_store_hours
+  - ask_product_details
+  - add_to_cart
+
+entities:
+  - order_id
+  - product_category
+  - user_preference
+  - order_status
+  - product_to_order    # new entity
+  - quantity            # new entity
+  - shipping_address    # new entity
+  - search_term
+  - new_shipping_address
+
+slots:
+  order_id:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: order_id
+      - type: from_text
+
+  recommendations:         
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_text      
+
+  product_to_order:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: product_to_order 
+
+  quantity:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: quantity
+      - type: from_text  
+  
+  product_category:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: product_category
+
+  user_preference:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: user_preference
+
+  order_status:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_text
+
+  shipping_address:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: shipping_address
+      - type: from_text
+
+  search_term:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: search_term
+      - type: from_text
+
+  new_shipping_address:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: new_shipping_address
+      - type: from_text
+
+responses:
+  utter_greet:
+    - text: "Hello! Welcome to ShopBot. How can I assist you today?"
+
+  utter_goodbye:
+    - text: "Thank you for visiting. Have a great day!"
+
+  utter_ask_order_id:
+    - text: "Sure, could you please provide your order ID so I can check the status?"
+
+  utter_order_status:
+    - text: "Your order with ID {order_id} is currently: {order_status}."
+
+  utter_order_not_found:
+    - text: "I’m sorry, I couldn’t find an order with ID {order_id}. Please double-check and try again."
+
+  utter_ask_complaint:
+    - text: "I’m sorry to hear you have a complaint. Could you describe the issue?"
+
+  utter_complaint_received:
+    - text: "Thank you for letting us know. We’ve logged your complaint: \"{complaint}\". Our team will follow up shortly."
+
+  utter_ask_preferences:
+    - text: "What kind of products are you interested in? (e.g., drama, sifi, fiction)"
+
+  utter_recommend_products:
+    - text: "Based on your interest in {product_category}, here are some recommendations:\n{recommendations}"
+
+  utter_no_recommendations:
+    - text: "Sorry, I don't have recommendations for that category right now. Would you like something else?"
+
+  # New prompts for the “order a product” flow:
+  utter_ask_product_to_order:
+    - text: "Sure—what would you like to order? (e.g., wireless headphones, a laptop, a T-shirt)"
+
+  utter_ask_quantity:
+    - text: "How many would you like to buy?"
+
+  utter_ask_address:
+    - text: "Where should we ship your order?"
+
+  utter_order_confirmed:
+    - text: "Great! Your order for {quantity} × {product_to_order} will be shipped to {shipping_address}. Your order number is {order_id}."
+
+  utter_ask_general_info:
+    - text: "Feel free to ask me about order tracking, product recommendations, or any other questions."
+
+  utter_thankyou:
+    - text: "You’re welcome! Happy to help."
+
+  utter_default:
+    - text: "I’m not sure I understand. Could you rephrase that?"
+    
+  utter_ask_search_term:
+    - text: "What product keyword should I search for?"
+
+  utter_ask_new_address:
+    - text: "What is the new shipping address?"
+
+actions:
+  - action_check_order_status
+  - action_log_complaint
+  - action_recommend_products
+  - action_place_order
+  - action_track_shipment
+  - action_cancel_order
+  - action_return_order
+  - action_list_categories
+  - action_product_search
+  - action_product_availability
+  - action_update_address
+  - action_store_hours
+  - action_product_details
+  - action_add_to_cart

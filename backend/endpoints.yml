@@ -1,0 +1,18 @@
+action_endpoint:
+  url: "http://localhost:5055/webhook"
+
+# ------------------------------------------------------------------
+# Tracker & lock stores on Neon – SSL required
+# ------------------------------------------------------------------
+tracker_store:
+  type: SQL
+  dialect: "postgresql"
+  url: ep-old-fire-a2imcysh-pooler.eu-central-1.aws.neon.tech
+  port: 5432
+  db: neondb
+  username: neondb_owner
+  password: npg_yUzAue68mWCH
+  login_db: postgres
+  additional_arguments:
+    sslmode: "require"
+

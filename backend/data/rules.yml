@@ -1,0 +1,110 @@
+version: "3.1"
+
+rules:
+
+# ────────────────────── BASIC CHITCHAT ──────────────────────────────
+- rule: Greet user
+  steps:
+    - intent: greet
+    - action: utter_greet
+
+- rule: Thank the user
+  steps:
+    - intent: thankyou
+    - action: utter_thankyou
+
+- rule: Goodbye
+  steps:
+    - intent: goodbye
+    - action: utter_goodbye
+
+
+
+# ────────────────────── SIMPLE ONE-TURN QUERIES ─────────────────────
+- rule: List product categories
+  steps:
+    - intent: list_categories
+    - action: action_list_categories
+
+- rule: Store hours
+  steps:
+    - intent: ask_store_hours
+    - action: action_store_hours
+
+- rule: Shipment tracking
+  steps:
+    - intent: track_shipment
+    - action: action_track_shipment
+
+- rule: Cancel an order
+  steps:
+    - intent: cancel_order
+    - action: action_cancel_order
+
+- rule: Return an order
+  steps:
+    - intent: return_order
+    - action: action_return_order
+
+- rule: Product keyword search
+  steps:
+    - intent: product_search
+    - action: action_product_search
+
+- rule: Product availability
+  steps:
+    - intent: product_availability
+    - action: action_product_availability
+
+- rule: Update shipping address
+  steps:
+    - intent: update_address
+    - action: action_update_address
+
+- rule: Store general info
+  steps:
+    - intent: ask_general_info
+    - action: utter_ask_general_info
+
+
+
+# ────────────────────── ORDER STATUS / RECOMMENDATION PROMPTS ───────
+- rule: Ask for order ID
+  steps:
+    - intent: ask_order_status
+    - action: utter_ask_order_id
+
+- rule: Ask for user preferences
+  steps:
+    - intent: ask_product_recommendation
+    - action: utter_ask_preferences
+
+- rule: Provide recommendations
+  steps:
+    - intent: provide_preferences
+    - action: action_recommend_products
+
+
+
+# ────────────────────── PRODUCT DETAILS (ONE TURN) ──────────────────
+- rule: Show product details
+  steps:
+    - intent: ask_product_details
+    - action: action_product_details
+
+
+
+# ────────────────────── ADD-TO-CART MINI-FLOW ───────────────────────
+
+- rule: Add-to-cart ask quantity
+  steps:
+    - intent: add_to_cart
+      entities:
+        - product_to_order
+    - action: utter_ask_quantity      # “How many would you like to add?”
+
+
+- rule: Add-to-cart after quantity
+  steps:
+    - intent: provide_quantity
+    - action: action_add_to_cart

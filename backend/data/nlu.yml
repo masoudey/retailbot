@@ -1,0 +1,202 @@
+version: "3.1"
+
+nlu:
+# ── Basic chitchat ────────────────────────────────────────────────
+- intent: greet
+  examples: |
+    - hey
+    - hello
+    - hi
+    - hey there
+    - Hello
+    - Hi
+    - hi there
+
+
+- intent: goodbye
+  examples: |
+    - bye
+    - goodbye
+    - bye bye
+    - see you later
+    - see ya
+    - talk to you later
+    - thanks, bye
+    - catch you later
+    - ciao
+    - have a good one
+    - later
+
+# ── Order status ─────────────────────────────────────────────────
+- intent: ask_order_status
+  examples: |
+    - I want to check my order status
+    - Can you track my order?
+    - Where is my order?
+    - Track order
+
+- intent: provide_order_id
+  examples: |
+    - My order ID is [12345](order_id)
+    - It's [ABC123](order_id)
+    - [98765](order_id)
+    - Order ID: [54321](order_id)
+    - [12345](order_id)
+    - 12345
+
+
+
+# ── Recommendation flow ──────────────────────────────────────────
+# ── Recommendation flow ─────────────────────────────────────
+- intent: ask_product_recommendation
+  examples: |
+    - Can you recommend me something?
+    - I'd like a recommendation
+    - give me a recommendation
+    - recommend me something
+    - recommend me a book
+    - any recommendations?
+    - show me something you recommend
+    - recommend me
+    - recommendation please
+    - what do you recommend?
+
+# ── Provide preferences (for recommendations) ────────────────────
+# ── Choose a book category (to get recommendations) ───────────────
+- intent: provide_preferences
+  examples: |
+    # single-word mentions
+    - fiction
+    - non-fiction
+    - classics
+    - self-help
+    - children
+    - sci-fi
+    - fantasy
+    - biography
+    # longer variants with the entity annotated ↓
+    - Show me some [fiction](product_category) titles
+    - I’m interested in [non-fiction](product_category)
+    - I like [classics](product_category)
+    - Recommend good [self-help](product_category) books
+    - Any [children](product_category) books?
+
+
+# ── Departments / categories ─────────────────────────────────────
+- intent: list_categories
+  examples: |
+    - What departments do you have
+    - Show me all categories
+    - Browse categories
+    - List your product categories
+    - What sections are there
+
+# ── Product details ──────────────────────────────────────────────
+- intent: ask_product_details
+  examples: |
+    - Tell me more about [Clean Code](product_to_order)
+    - Show details for [Deep Learning with Python](product_to_order)
+    - More info on [Clean Code](product_to_order)
+    - Give me the specs of [Clean Code](product_to_order)
+    - What does [Clean Code](product_to_order) cover?
+    - Can I see details for [Clean Code](product_to_order)?
+    - Show me the description of [Clean Code](product_to_order)
+    - Details about [Clean Code](product_to_order)
+
+# ── Add-to-cart flow ─────────────────────────────────────────────
+- intent: add_to_cart
+  examples: |
+    - I’d like to buy [Clean Code](product_to_order)
+    - I'd like to buy a [laptop](product_to_order)
+    - I'd like to buy the [Bluetooth Speaker](product_to_order)
+    - I'd like to purchase [Deep Learning with Python](product_to_order)
+    - Can I buy [Clean Code](product_to_order)?
+    - Please order [Clean Code](product_to_order) for me
+    - order [Clean Code](product_to_order)
+    - please order [Clean Code](product_to_order)
+    - add [Clean Code](product_to_order) to my cart
+
+- intent: provide_quantity
+  examples: |
+    - 1
+    - 2
+    - 3
+    - one
+    - two
+    - three
+    - [1](quantity)
+    - [2](quantity)
+    - [3](quantity)
+
+
+
+# ── Complaints ───────────────────────────────────────────────────
+- intent: ask_complaint
+  examples: |
+    - I have a complaint
+    - I want to report an issue
+
+- intent: provide_complaint
+  examples: |
+    - The product arrived damaged
+    - I received the wrong item
+
+# ── Shipping / orders ────────────────────────────────────────────
+- intent: track_shipment
+  examples: |
+    - Where is my package?
+    - Track shipment [98765](order_id)
+    - Has order [ABC123](order_id) been delivered?
+
+- intent: cancel_order
+  examples: |
+    - Cancel order [12345](order_id)
+    - I want to cancel my purchase
+
+- intent: return_order
+  examples: |
+    - I'd like to return order [67890](order_id)
+    - Start a return for my last order
+
+- intent: update_address
+  examples: |
+    - Ship to a new address: [456 Oak Ave, Berlin](new_shipping_address)
+    - Change my address for order [12345](order_id) to [12 New St, Paris](new_shipping_address)
+
+# ── Product catalog ──────────────────────────────────────────────
+- intent: product_search
+  examples: |
+    - Do you have any [headphones](search_term)?
+    - Show me [coffee mugs](search_term)
+    - I'm looking for [Nike shoes](search_term)
+
+- intent: product_availability
+  examples: |
+    - Is the [Casual T-Shirt](product_to_order) in stock?
+    - Do you have the [Bluetooth Speaker](product_to_order) available?
+
+# ── Misc store info ───────────────────────────────────────────────
+- intent: ask_store_hours
+  examples: |
+    - When are you open?
+    - Store hours?
+
+- intent: ask_general_info
+  examples: |
+    - Tell me about your store
+
+# ── Address capture (order flow) ─────────────────────────────────
+- intent: provide_address
+  examples: |
+    - Ship it to [123 Main St, Springfield](shipping_address)
+
+# ── Other ────────────────────────────────────────────────────────
+- intent: thankyou
+  examples: |
+    - thanks
+    - thank you
+
+- intent: deny
+  examples: |
+    - no
+    - not really
