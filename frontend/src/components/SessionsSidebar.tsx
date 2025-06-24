@@ -25,43 +25,34 @@ export default function SessionsSidebar() {
     navigate(`/chat/${newSession.id}`);
   };
 
-  const activeId =
-    pathname.startsWith("/chat/") ? pathname.split("/").pop() : null;
+  const activeId = pathname.startsWith("/chat/")
+    ? pathname.split("/").pop()
+    : null;
 
   return (
-    <aside className="w-64 shrink-0 h-full flex flex-col bg-white/80 backdrop-blur-md">
-      <header className="px-4 py-3 font-semibold tracking-tight">Sessions</header>
+    <aside className="w-72 shrink-0 sticky top-0 h-screen flex flex-col bg-secondary/80 backdrop-blur-md p-4 space-y-4 overflow-y-auto">
+      <h2 className="text-lg font-medium text-text">Conversations</h2>
 
-      <nav className="flex-1 overflow-y-auto">
-        {sessions.length === 0 ? (
-          <p className="px-4 py-6 text-gray-600 text-sm">
-            No conversations yet.
-          </p>
-        ) : (
-          <ul className="space-y-1 p-2 list-none">
-            {sessions.map((s) => (
-              <li key={s.id}>
-                <Link
-                  to={`/chat/${s.id}`}
-                  className={`block px-3 py-2 rounded-md text-sm ${
-                    s.id === activeId
-                      ? "bg-accent text-white"
-                      : "hover:bg-gray-100"
-                  }`}
-                >
-                  {new Date(s.createdAt).toLocaleString()}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </nav>
+      <ul className="space-y-2 list-none">
+        {sessions.map((s) => (
+          <li key={s.id}>
+            <Link
+              to={`/chat/${s.id}`}
+              className={`block px-3 py-2 rounded-lg text-text hover:bg-primary/50 transition ${
+                s.id === activeId ? "bg-accent text-white" : ""
+              }`}
+            >
+              {new Date(s.createdAt).toLocaleTimeString()}
+            </Link>
+          </li>
+        ))}
+      </ul>
 
       <button
         onClick={createSession}
-        className="m-4 bg-accent text-white rounded-full px-4 py-2 text-sm font-medium shadow hover:shadow-lg transition"
+        className="mt-auto bg-accent text-white py-2 rounded-full hover:bg-accent/80 transition"
       >
-        + New chat
+        + New Chat
       </button>
     </aside>
   );

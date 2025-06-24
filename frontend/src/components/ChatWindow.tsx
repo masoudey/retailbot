@@ -13,16 +13,11 @@ export default function ChatWindow({ sessionId }: Props) {
   const [input, setInput] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
 
-  /* ─────────────────────────────────────────────
-     Load chat history (or clear) when sessionId
-     changes — ensures “New chat” starts blank
-  ────────────────────────────────────────────── */
   useEffect(() => {
     const stored = localStorage.getItem(`chat-${sessionId}`);
     setMessages(stored ? JSON.parse(stored) : []);
   }, [sessionId]);
 
-  /* persist + auto-scroll */
   useEffect(() => {
     localStorage.setItem(`chat-${sessionId}`, JSON.stringify(messages));
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -32,8 +27,7 @@ export default function ChatWindow({ sessionId }: Props) {
     e.preventDefault();
     if (!input.trim()) return;
 
-    const userMsg: Message = { text: input, sender: "user" };
-    setMessages((prev) => [...prev, userMsg]);
+    setMessages((prev) => [...prev, { text: input, sender: "user" }]);
     setInput("");
 
     try {
@@ -48,27 +42,29 @@ export default function ChatWindow({ sessionId }: Props) {
   };
 
   return (
-    <div className="flex flex-col h-full w-full max-w-lg bg-white/60 rounded-3xl shadow-xl overflow-hidden">
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
-        {messages.map((m, idx) => (
-          <MessageBubble key={idx} message={m} />
+    <div className="flex flex-col flex-1 bg-secondary/70 rounded-2xl shadow-xl overflow-hidden backdrop-blur-sm mx-4">
+      {/* Scrollable message list */}
+      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
+        {messages.map((m, i) => (
+          <MessageBubble key={i} message={m} />
         ))}
         <div ref={endRef} />
       </div>
 
+      {/* Input bar */}
       <form
         onSubmit={handleSubmit}
-        className="border-t border-gray-200 p-4 flex gap-4 bg-white/80 backdrop-blur-sm"
+        className="bg-secondary/50 p-4 flex gap-3 mt-auto"
       >
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Type your message…"
-          className="flex-1 rounded-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-accent"
+          placeholder="Type a message…"
+          className="flex-1 rounded-full px-4 py-2 bg-primary/30 text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent"
         />
         <button
           type="submit"
-          className="bg-accent text-white rounded-full px-6 py-3 font-medium shadow hover:shadow-lg transition"
+          className="bg-accent text-white px-4 py-2 rounded-full hover:bg-accent/80 transition"
         >
           Send
         </button>

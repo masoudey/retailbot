@@ -1,6 +1,10 @@
+// tailwind.config.cjs
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./index.html", "./src/**/*.{ts,tsx}"],
+  content: [
+    "./index.html",
+    "./src/**/*.{ts,tsx,js,jsx}"
+  ],
   theme: {
     extend: {
       fontFamily: {
@@ -14,8 +18,11 @@ module.exports = {
         ]
       },
       colors: {
-        primary: "#f5f5f7", // Apple light-grey background
-        accent: "#0071e3"   // Apple blue accent
+        primary:   "#1e293b",
+        secondary: "#334155",
+        accent:    "#3b82f6",
+        muted:     "#64748b",
+        text:      "#f1f5f9"
       }
     }
   },

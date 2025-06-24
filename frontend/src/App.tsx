@@ -5,7 +5,7 @@ import NavBar from "./components/NavBar";
 
 export default function App() {
     return (
-      <div className="flex flex-col h-full bg-primary">
+      <div className="flex flex-col h-full">
       <NavBar />
       <div className="flex-1">
         <Routes>

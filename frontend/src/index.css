@@ -2,11 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Thin, subtle scrollbars – like macOS */
+/* Make the app fill the viewport and disable body scrolling */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+/* Global background & text */
+body {
+  @apply bg-primary text-text;
+}
+
+/* Refined scrollbar */
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
 }
 ::-webkit-scrollbar-thumb {
-  background-color: #9ca3af;
-  border-radius: 9999px;
+  @apply bg-muted rounded-full;
 }
