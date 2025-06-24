@@ -36,6 +36,7 @@ entities:
   - shipping_address    # new entity
   - search_term
   - new_shipping_address
+  - product_details    # new entity
 
 slots:
   order_id:
@@ -50,14 +51,25 @@ slots:
     type: text
     influence_conversation: false
     mappings:
-      - type: from_text      
+      - type: from_text 
+
+  product_details:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: product_details
+ 
+
 
   product_to_order:
     type: text
     influence_conversation: false
     mappings:
       - type: from_entity
-        entity: product_to_order 
+        entity: product_to_order
+
+
 
   quantity:
     type: text
@@ -185,3 +197,5 @@ actions:
   - action_store_hours
   - action_product_details
   - action_add_to_cart
+  - action_session_start
+  - action_save_message

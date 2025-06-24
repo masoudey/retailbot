@@ -18,6 +18,7 @@ from psycopg2.extras import RealDictCursor
 from rasa_sdk import Action, Tracker
 from rasa_sdk.events import SlotSet
 from rasa_sdk.executor import CollectingDispatcher
+from rasa_sdk.events import SessionStarted, ActionExecuted
 
 logger = logging.getLogger(__name__)
 
@@ -83,15 +84,40 @@ def fetchall(query: str, params: tuple | list = ()) -> List[Dict[str, Any]]:
 
 
 def execute(query: str, params: tuple | list = ()) -> Any:
+    conn = get_db_connection()
     try:
-        with get_db_connection() as conn, conn.cursor() as cur:
-            cur.execute(query, params)
-            conn.commit()
-            if cur.description:
-                return cur.fetchone()[0]  # e.g. id from RETURNING id
+        cur = conn.cursor()
+        # debug prints
+        print(f"[execute] ▶️ SQL: {query}")
+        print(f"[execute] ▶️ Params: {params!r}")
+
+        cur.execute(query, params)
+
+        result = None
+        # only try fetching if the statement returned rows (e.g. RETURNING)
+        if cur.description:
+            row = cur.fetchone()
+            print(f"[execute] 👀 raw fetched row: {row!r}")
+
+            if row is not None:
+                # handle both tuple and dict cursors
+                if isinstance(row, dict):
+                    result = next(iter(row.values()))
+                else:
+                    result = row[0]
+            print(f"[execute] ✅ returning result: {result!r}")
+
+        conn.commit()
+        return result
+
     except Exception as e:
-        logger.error("execute: %s", e)
-    return None
+        conn.rollback()
+        print(f"[execute] ❌ exception: {e}")
+        return None
+
+    finally:
+        cur.close()
+        conn.close()
 
 
 # Run schema check immediately
@@ -107,10 +133,83 @@ def update_order_status(order_id: int | str, new_status: str) -> bool:
     )
     return bool(rows)
 
+def append_session_message(session_id: str, sender: str, text: str) -> None:
+    """
+    Appends one message object to the JSONB 'messages' array for this session.
+    """
+    # Build the JSON array literal of one element:
+    msg_obj = {
+        "sender": sender,
+        "text": text,
+        "ts": datetime.utcnow().isoformat()
+    }
+    # We wrap it in [] so JSONB concatenation works:
+    payload = json.dumps([msg_obj])
+    execute(
+        """
+        UPDATE sessions
+           SET messages = messages || %s::jsonb
+             , updated_at = NOW()
+         WHERE id = %s
+        """,
+        (payload, session_id),
+    )
 
 # ──────────────────────────────────────────────────────────
 # Core actions
 # ──────────────────────────────────────────────────────────
+
+class ActionSaveMessage(Action):
+    def name(self) -> Text:
+        return "action_save_message"
+
+    async def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: dict,
+    ) -> list:
+        # Grab the latest user message
+        user_text = tracker.latest_message.get("text") or ""
+        session_id = tracker.sender_id
+
+        # Ensure session row exists
+        execute(
+            "INSERT INTO sessions (id) VALUES (%s) ON CONFLICT (id) DO NOTHING",
+            (session_id,),
+        )
+        # Append this user message
+        append_session_message(session_id, "user", user_text)
+
+        return []
+
+class ActionSessionStart(Action):
+    def name(self) -> str:
+        return "action_session_start"
+
+    async def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: dict,
+    ) -> list:
+        # 1) Run the default session start events
+        events = [SessionStarted(), ActionExecuted("action_listen")]
+
+        # 2) Create a session row in the DB (if it doesn't already exist)
+        session_id = tracker.sender_id
+        execute(
+            """
+            INSERT INTO sessions (id, created_at, updated_at)
+            VALUES (%s, NOW(), NOW())
+            ON CONFLICT (id) DO NOTHING
+            """,
+            (session_id,),
+        )
+
+        # 3) Return the events so Rasa continues as normal
+        return events
+    
 class ActionCheckOrderStatus(Action):
     def name(self) -> Text: return "action_check_order_status"
 
@@ -191,7 +290,8 @@ class ActionProductDetails(Action):
         tracker: Tracker,
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
-        product_name = tracker.get_slot("product_to_order")
+        product_name = tracker.get_slot("product_details")
+        print(f"[ProductDetails] Looking up product: {product_name!r}")
         if not product_name:
             dispatcher.utter_message("Which product would you like details about?")
             return []
@@ -222,6 +322,7 @@ class ActionProductDetails(Action):
 # ──────────────────────────────────────────────────────────
 # Add-to-cart helper
 # ──────────────────────────────────────────────────────────
+
 class ActionAddToCart(Action):
     """Adds (or increments) a product in the user’s cart_items."""
 
@@ -234,49 +335,91 @@ class ActionAddToCart(Action):
         tracker: Tracker,
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
-
-        # Slots captured by NLU / previous turns
+        session_id   = tracker.sender_id
         product_name = (tracker.get_slot("product_to_order") or "").strip()
         quantity_raw = (tracker.get_slot("quantity") or "1").strip()
 
-        # Basic validation --------------------------------------------------
+        # 1) Ensure session exists
+        print(f"[AddToCart] Ensuring session {session_id} exists")
+        execute(
+            "INSERT INTO sessions (id) VALUES (%s) ON CONFLICT DO NOTHING",
+            (session_id,),
+        )
+
+        # 2) Find or create "open" order for this session
+        order = fetchone(
+            "SELECT id, total_amount FROM orders "
+            "WHERE session_id = %s AND status = 'processing'",
+            (session_id,),
+        )
+        print(f"[AddToCart] Fetched existing order row: {order}")
+        if order:
+            order_id      = order["id"]
+            current_total = Decimal(order["total_amount"])
+            print(f"[AddToCart] Using existing order_id={order_id}, current_total={current_total}")
+        else:
+            print(f"[AddToCart] No existing order for session {session_id}, creating one")
+            order_id = execute(
+                "INSERT INTO orders (session_id, total_amount) "
+                "VALUES (%s, %s) RETURNING id",
+                (session_id, Decimal("0.00")),
+            )
+            print(f"[AddToCart] Created new order, returned order_id={order_id}")
+            if order_id is None:
+                dispatcher.utter_message("❌ Sorry, I couldn’t start your cart. Please try again.")
+                return []
+            current_total = Decimal("0.00")
+
+        # 3) Basic validation: product exists & quantity parse
         if not product_name:
             dispatcher.utter_message("Which product would you like to add?")
             return []
-
         try:
             quantity = max(1, int(quantity_raw))
         except ValueError:
             dispatcher.utter_message("How many would you like to add?")
             return []
 
-        # Look-up product in catalog (case-insensitive) ---------------------
         prod = fetchone(
             "SELECT id, name, price FROM products WHERE LOWER(name) = %s LIMIT 1",
             (product_name.lower(),),
         )
+        print(f"[AddToCart] Looked up product: {prod}")
         if not prod:
             dispatcher.utter_message("I couldn't find that product in our catalog.")
             return []
 
-        # Insert / upsert into cart_items -----------------------------------
-        session_id = tracker.sender_id                    # unique per conversation
+        # 4) Upsert into cart_items (only if we have a valid order_id)
+        if order_id:
+            print(f"[AddToCart] Inserting/updating cart_items for order_id={order_id}, product_id={prod['id']}, qty={quantity}")
+            execute(
+                """
+                INSERT INTO cart_items (order_id, product_id, qty, unit_price)
+                VALUES (%s, %s, %s, %s)
+                ON CONFLICT (order_id, product_id)
+                DO UPDATE SET qty = cart_items.qty + EXCLUDED.qty
+                """,
+                (order_id, prod["id"], quantity, Decimal(prod["price"])),
+            )
+        else:
+            dispatcher.utter_message("❌ Something went wrong: no order to attach the item to.")
+            return []
+
+        # 5) Update order total_amount
+        new_total = current_total + Decimal(prod["price"]) * quantity
+        print(f"[AddToCart] Updating order {order_id} total from {current_total} to {new_total}")
         execute(
-            """
-            INSERT INTO cart_items (session_id, product_id, qty, unit_price)
-            VALUES (%s, %s, %s, %s)
-            ON CONFLICT (session_id, product_id)
-            DO UPDATE SET qty = cart_items.qty + EXCLUDED.qty
-            """,
-            (session_id, prod["id"], quantity, Decimal(prod["price"])),
+            "UPDATE orders SET total_amount = %s WHERE id = %s",
+            (new_total, order_id),
         )
 
         dispatcher.utter_message(
             f"✅ Added {quantity} × *{prod['name']}* to your cart."
         )
-
-        # Clear quantity slot so the next “add” starts clean
+        # reset for next time
         return [SlotSet("quantity", None)]
+
+
 
 class ActionTrackShipment(Action):
     def name(self) -> Text: return "action_track_shipment"

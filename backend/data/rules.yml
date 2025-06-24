@@ -3,6 +3,13 @@ version: "3.1"
 rules:
 
 # ────────────────────── BASIC CHITCHAT ──────────────────────────────
+
+- rule: Session start
+  steps:
+    - intent: session_start
+    - action: action_session_start
+    - action: utter_greet  
+
 - rule: Greet user
   steps:
     - intent: greet
@@ -108,3 +115,10 @@ rules:
   steps:
     - intent: provide_quantity
     - action: action_add_to_cart
+
+
+- rule: save each user message
+  steps:
+    - intent: anything   
+    - action: action_save_message
+    - action: action_listen

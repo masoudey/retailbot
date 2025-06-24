@@ -61,14 +61,7 @@ CREATE TABLE IF NOT EXISTS products (
 /*--------------------------------------------------------------------
   Orders, items, payments, shipments
 --------------------------------------------------------------------*/
-CREATE TABLE IF NOT EXISTS orders (
-    id            SERIAL PRIMARY KEY,
-    customer_id   INTEGER REFERENCES customers(id),
-    session_id   TEXT REFERENCES sessions(id),
-    status        order_status DEFAULT 'processing',
-    total_amount  NUMERIC(10,2),
-    placed_at     TIMESTAMPTZ DEFAULT NOW()
-);
+
 
 
 CREATE TABLE IF NOT EXISTS payments (
@@ -105,23 +98,32 @@ CREATE TABLE IF NOT EXISTS complaints (
     created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
-/*--------------------------------------------------------------------
-  Chat sessions
---------------------------------------------------------------------*/
+
+-- sessions table
 CREATE TABLE IF NOT EXISTS sessions (
-    id          TEXT PRIMARY KEY,                -- tracker.sender_id
-    customer_id INTEGER REFERENCES customers(id),
-    messages    JSONB       DEFAULT '[]',        -- array of {sender,text,ts}
-    created_at  TIMESTAMPTZ DEFAULT NOW(),
-    updated_at  TIMESTAMPTZ DEFAULT NOW()
+  id          TEXT PRIMARY KEY,                 -- Rasa tracker.sender_id
+  customer_id INTEGER REFERENCES customers(id),
+  messages    JSONB       DEFAULT '[]',         -- [{sender,text,ts},…]
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- orders table (one “open” cart/order per session)
+CREATE TABLE IF NOT EXISTS orders (
+  id           SERIAL PRIMARY KEY,
+  session_id   TEXT REFERENCES sessions(id) ON DELETE CASCADE,
+  customer_id  INTEGER REFERENCES customers(id),
+  status       order_status  DEFAULT 'processing',
+  total_amount NUMERIC(10,2) DEFAULT 0.00,
+  placed_at    TIMESTAMPTZ   DEFAULT NOW()
+);
+
+-- cart_items table (line items for the open order)
 CREATE TABLE IF NOT EXISTS cart_items (
-    session_id  TEXT   NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
-    product_id  INTEGER REFERENCES products(id) ON DELETE CASCADE,
-    order_id   INTEGER REFERENCES orders(id) ON DELETE CASCADE,
-    qty         INTEGER NOT NULL CHECK (qty > 0),
-    unit_price  NUMERIC(10,2) NOT NULL,
-    added_at    TIMESTAMPTZ DEFAULT NOW(),
-    PRIMARY KEY (session_id, product_id, order_id)
+  order_id   INTEGER REFERENCES orders(id) ON DELETE CASCADE,
+  product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+  qty        INTEGER NOT NULL CHECK (qty > 0),
+  unit_price NUMERIC(10,2) NOT NULL,
+  added_at   TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (order_id, product_id)
 );

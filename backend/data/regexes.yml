@@ -1,0 +1,10 @@
+version: "3.1"
+
+nlu:
+  - regex: product_to_order       
+    examples: |                  
+      (?i)(?:order|buy|purchase|add(?: to cart)?)\s+(.+)
+
+  - regex: product_details
+    examples: |
+      (?i)(?:details about|more info on|tell me (?:more )?about|info on|what is)\s+(.+)

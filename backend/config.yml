@@ -7,6 +7,7 @@ pipeline:
 - name: RegexFeaturizer
 - name: RegexEntityExtractor
 
+
   # BERT / RoBERTa / DistilBERT via Hugging-Face
 - name: LanguageModelFeaturizer
   model_name: "bert"                # bert | roberta | distilbert …

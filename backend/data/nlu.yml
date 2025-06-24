@@ -65,7 +65,6 @@ nlu:
 # ── Choose a book category (to get recommendations) ───────────────
 - intent: provide_preferences
   examples: |
-    # single-word mentions
     - fiction
     - non-fiction
     - classics
@@ -74,7 +73,6 @@ nlu:
     - sci-fi
     - fantasy
     - biography
-    # longer variants with the entity annotated ↓
     - Show me some [fiction](product_category) titles
     - I’m interested in [non-fiction](product_category)
     - I like [classics](product_category)
@@ -85,36 +83,58 @@ nlu:
 # ── Departments / categories ─────────────────────────────────────
 - intent: list_categories
   examples: |
-    - What departments do you have
+    - What list_categories do you have
     - Show me all categories
     - Browse categories
     - List your product categories
     - What sections are there
 
 # ── Product details ──────────────────────────────────────────────
+
 - intent: ask_product_details
   examples: |
-    - Tell me more about [Clean Code](product_to_order)
-    - Show details for [Deep Learning with Python](product_to_order)
-    - More info on [Clean Code](product_to_order)
-    - Give me the specs of [Clean Code](product_to_order)
-    - What does [Clean Code](product_to_order) cover?
-    - Can I see details for [Clean Code](product_to_order)?
-    - Show me the description of [Clean Code](product_to_order)
-    - Details about [Clean Code](product_to_order)
+    - Tell me more about [book](product_details)
+    - Show details for [a novel](product_details)
+    - More info on [item](product_details)
+    - Give me the specs of [book](product_details)
+    - What does [the product](product_details) cover?
+    - Can I see details for [the laptop](product_details)?
+    - Show me the description of [headphones](product_details)
+    - Details about [the gadget](product_details)
+    - more info on (product_details)
+    - more info on [this book](product_details)
+    - more info on [this product](product_details)
+    - more info on [name name name](product_details)
+    - details on [book](product_details)
+    - more about [book](product_details)
+    - tell me about [book](product_details)
+    - info on [book](product_details)
 
 # ── Add-to-cart flow ─────────────────────────────────────────────
 - intent: add_to_cart
   examples: |
-    - I’d like to buy [Clean Code](product_to_order)
-    - I'd like to buy a [laptop](product_to_order)
-    - I'd like to buy the [Bluetooth Speaker](product_to_order)
+    - I’d like to buy [book](product_to_order)
+    - I'd like to buy a [anything](product_to_order)
+    - I'd like to buy the [Atomic Habits](product_to_order)
     - I'd like to purchase [Deep Learning with Python](product_to_order)
-    - Can I buy [Clean Code](product_to_order)?
-    - Please order [Clean Code](product_to_order) for me
+    - Can I buy [duno](product_to_order)?
+    - Please order [duno](product_to_order) for me
+    - please order [a book](product_to_order)
+    - add [book](product_to_order) to my cart
+    - order [book](product_to_order)
+    - I want to order [product](product_to_order)
+    - I'd like to order [book](product_to_order)
+    - order [Dune](product_to_order)
+    - order [Foundation](product_to_order)
     - order [Clean Code](product_to_order)
-    - please order [Clean Code](product_to_order)
-    - add [Clean Code](product_to_order) to my cart
+    - order [Atomic Habits](product_to_order)
+    - order [Deep Work](product_to_order)
+    - order [The Hobbit](product_to_order)
+    - order [Neuromancer](product_to_order)
+    - order [iPhone 15](product_to_order)
+    - order [Bluetooth speaker](product_to_order)
+    - order [lamp](product_to_order)
+
 
 - intent: provide_quantity
   examples: |
